@@ -1,30 +1,35 @@
 // import { nanoid } from "nanoid";
-import "./App.css";
-import CSS from "./App.module.css";
+import './App.css';
+import CSS from './App.module.css';
 
-import ContactForm from "./components/ContactForm/ContactForm";
-import SearchBox from "./components/SearchBox/SearchBox";
-import ContactList from "./components/ContactList/ContactList";
-
-import { useSelector, useDispatch } from "react-redux";
+import ContactForm from './components/ContactForm/ContactForm';
+import SearchBox from './components/SearchBox/SearchBox';
+import ContactList from './components/ContactList/ContactList';
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectContacts } from './components/redux/contactsSlice';
 import {
   addContact,
   deleteContact,
-  selectContacts,
-} from "./components/redux/contactsSlice";
+  fetchContacts,
+} from './components/redux/contactsOps';
 import {
   changeFilter,
   selectNameFilter,
-} from "./components/redux/filtersSlice";
+} from './components/redux/filtersSlice';
 
 function App() {
   const contacts = useSelector(selectContacts);
   const filter = useSelector(selectNameFilter);
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
+
   const handleAddContact = ({ name, number }) => {
     const exists = contacts.find(
-      (contact) => contact.name.toLowerCase() === name.toLowerCase()
+      contact => contact.name.toLowerCase() === name.toLowerCase(),
     );
     if (exists) {
       alert(`${name} is already in contacts`);
@@ -33,27 +38,28 @@ function App() {
     dispatch(addContact({ name, number }));
   };
 
-  const handleDeleteContact = (contact) => {
+  const handleDeleteContact = contact => {
     dispatch(deleteContact(contact));
   };
 
-  const handleFilterChange = (e) => {
+  const handleFilterChange = e => {
     dispatch(changeFilter(e.target.value));
   };
 
-  const filteredContacts = contacts.filter(
-    (contact) =>
-      typeof contact.name === "string" &&
-      contact.name.toLowerCase().includes(filter.toLowerCase())
-  );
-  // console.log(contacts);
+  // const filteredContacts = contacts.filter(
+  //   (contact) =>
+  //     typeof contact.name === "string" &&
+  //     contact.name.toLowerCase().includes(filter.toLowerCase())
+  // );
+  // // console.log(contacts);
 
   return (
     <div className={CSS.App}>
       <h1>Phonebook</h1>
       <ContactForm onAddContact={handleAddContact} />
       <SearchBox value={filter} onChange={handleFilterChange} />
-      <ContactList contacts={filteredContacts} onDelete={handleDeleteContact} />
+      <ContactList onDelete={handleDeleteContact} />
+      {/* <ContactList contacts={filteredContacts} onDelete={handleDeleteContact} /> */}
     </div>
   );
 }
